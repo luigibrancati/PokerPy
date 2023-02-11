@@ -78,12 +78,28 @@ struct Card{
         return (this->value == rhs.value) && (this->suit == rhs.suit);
     }
 
-    bool operator>=(const Card& rhs) const {
-        if(this->value >= rhs.value){
+    bool operator!=(const Card& rhs) const {
+        return !(*this == rhs);
+    }
+
+    bool operator>(const Card& rhs) const {
+        if(this->value > rhs.value){
             return true;
-        } else {
-            return this->suit >= rhs.suit;
+        } else if(this->value == rhs.value) {
+            return this->suit > rhs.suit;
         }
+    }
+
+    bool operator>=(const Card& rhs) const {
+        return (*this > rhs) || (*this == rhs);
+    }
+
+    bool operator<=(const Card& rhs) const {
+        return !(*this > rhs);
+    }
+
+    bool operator<(const Card& rhs) const {
+        return !(*this >= rhs);
     }
 };
 
