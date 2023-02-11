@@ -21,5 +21,6 @@ def test_card_eq():
     assert Card(12, 2) != Card(13, 1)
 
 def test_card_ge():
+    assert Card(12, 2) >= Card(12, 2)
     assert Card(12, 2) >= Card(11, 2)
     assert Card(12, 2) >= Card(12, 1)

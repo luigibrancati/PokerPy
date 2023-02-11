@@ -7,7 +7,7 @@
 #include <pybind11/stl.h>
 #include "global.h"
 #include "utils.h"
-#include "poker_algorithms.h"
+#include "poker_algorithms_new.h"
 #include "poker_algorithms_old.h"
 
 using namespace std;
@@ -63,7 +63,9 @@ PYBIND11_MODULE(PokerPy, m) {
         .def("__repr__", &Hand::to_string)
         .def("__eq__", &Hand::operator==)
         .def("__ge__", &Hand::operator>=);
-    m.def("get_best_hand", &poker_algo_new::get_best_hand_not_sorted, "A function that gets the best hands given 7 cards");
-    m.def("calculate_hand_frequency", &poker_algo_new::calculate_hand_frequency, "A function that gets the frequencies of the possible hands given any number of cards");
+    m.def("get_best_hand", &poker_algo_old::get_best_hand_not_sorted, "A function that gets the best hands given 7 cards");
+    m.def("calculate_hand_frequency", &poker_algo_old::calculate_hand_frequency, "A function that gets the frequencies of the possible hands given any number of cards");
+    m.def("get_best_hand_new", &poker_algo_new::get_best_hand_not_sorted, "A function that gets the best hands given 7 cards");
+    m.def("calculate_hand_frequency_new", &poker_algo_new::calculate_hand_frequency, "A function that gets the frequencies of the possible hands given any number of cards");
     m.def("nice_print_frequencies", &nice_print_frequencies, "A function that gets the frequencies of the possible hands and prints them in nice format");
 }

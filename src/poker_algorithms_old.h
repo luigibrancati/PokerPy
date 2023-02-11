@@ -377,12 +377,13 @@ namespace poker_algo_old {
         for (int l = 0; l < players_cards.size(); l++)
         {
             players_hand_posibilities[l]["Total Cases"] = num_possible_cases;
+
         }
         return players_hand_posibilities;
     }
 
     Hand get_best_hand_not_sorted(array<Card,7> cards){
-        sort(cards.begin(),cards.end(),[](Card &a,Card &b){return a > b;});
+        sort(cards.begin(),cards.end(),[](Card &a,Card &b){return a.value > b.value;});
         return get_best_hand(cards);
     }
 }
