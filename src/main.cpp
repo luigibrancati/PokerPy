@@ -53,7 +53,8 @@ PYBIND11_MODULE(PokerPy, m) {
         .def_property("suit", [](Card& a){return suit_names[a.suit - 1];}, [](Card& a, string s){return a.suit = suit_values[s];})
         .def("__repr__", &Card::to_string)
         .def("__eq__", &Card::operator==)
-        .def("__ge__", &Card::operator>=);
+        .def("__ge__", &Card::operator>=)
+        .def("__lt__", &Card::operator<);
     py::class_<Hand>(m, "Hand")
         .def(py::init<short, array<Card,5>>())
         .def(py::init<string, array<Card,5>>())
@@ -69,3 +70,14 @@ PYBIND11_MODULE(PokerPy, m) {
     m.def("calculate_hand_frequency_new", &poker_algo_new::calculate_hand_frequency, "A function that gets the frequencies of the possible hands given any number of cards");
     m.def("nice_print_frequencies", &nice_print_frequencies, "A function that gets the frequencies of the possible hands and prints them in nice format");
 }
+
+// int main(){
+//     array<Card, 7> test_cards = {Card(12, 1), Card(11, 1), Card(11, 2), Card(10, 4), Card(9, 2), Card(3, 1), Card(3, 3)}; 
+//     Hand hand = poker_algo_new::get_best_hand_not_sorted(test_cards);
+//     std::cout << "Hand: "<<hand_names[hand.hand_type - 1] << std::endl;
+//     for(auto card:hand.Cards){
+//         std::cout<<card.value<<card.suit<<" ";
+//     }
+//     std::cout<<endl;
+//     return 0;
+// }
