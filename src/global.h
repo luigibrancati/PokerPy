@@ -88,6 +88,7 @@ struct Card{
         } else if(this->value == rhs.value) {
             return this->suit > rhs.suit;
         }
+        return false;
     }
 
     bool operator>=(const Card& rhs) const {
