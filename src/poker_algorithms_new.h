@@ -33,6 +33,15 @@ namespace poker_algo_new {
         for (uint8_t i = 0; i < 5; i++) array[i] = *vec[i];
     }
 
+    bool has_ace(array<Card, 7>& array){
+        for(auto a:array){
+            if(a.value == 13){
+                return true;
+            }
+        }
+        return false;
+    }
+
     card_vec find_flush(array<Card,7>& cards) {
         // Returns a vector, either empty or with the 5 cards making a flush
         // Assumes the cards are ordered in decreasing order
@@ -56,6 +65,7 @@ namespace poker_algo_new {
     }
 
     vector<card_vec> find_all_straights(array<Card,7>& cards) {
+        // TODO: ACE can be worth 13 or 1, this changes the possible straights
         // Returns a vector of vectors, either empty or with all straights found
         // Assumes the cards are ordered in decreasing order
         vector<card_vec> all_straight_cards;
@@ -78,6 +88,36 @@ namespace poker_algo_new {
                     continue;
                 } else {
                     break;
+                }
+            }
+        }
+        // Consider ACE = 1
+        if(has_ace(cards)){
+            // In order to conver ACE to 1 take the modulus 12 and reorder the cards
+            array<Card,7> cards_module;
+            uint8_t num_ace = 0;
+            for(uint8_t i = 0; i<cards.size(); i++){
+                cards_module[i].value = cards[i].value % 12;
+                cards_module[i].suit = cards[i].suit;
+                if(cards[i].value == 13) ++num_ace;
+            }
+            sort_cards(cards_module);
+            for(uint8_t start = 0; start < 3; start++){
+                card_vec curr_straight = {&cards[(start+num_ace)%7]};
+                straigh_num = 1;
+                uint8_t end = start+1;
+                for(end; end < cards.size(); end++){
+                    if((cards_module[start].value == (cards_module[end].value + straigh_num)) && (cards_module[end].value != cards_module[end - 1].value)){
+                        ++straigh_num;
+                        curr_straight.push_back(&cards[(end+num_ace)%7]);
+                        if(straigh_num == 5){
+                            all_straight_cards.push_back(curr_straight);
+                        }
+                    } else if (cards_module[end].value == cards_module[end - 1].value) {
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
             }
         }
