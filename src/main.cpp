@@ -54,6 +54,8 @@ PYBIND11_MODULE(PokerPy, m) {
         .def("__repr__", &Card::to_string)
         .def("__eq__", &Card::operator==)
         .def("__ge__", &Card::operator>=)
+        .def("__gt__", &Card::operator>)
+        .def("__le__", &Card::operator<=)
         .def("__lt__", &Card::operator<);
     py::class_<Hand>(m, "Hand")
         .def(py::init<short, array<Card,5>>())
@@ -72,7 +74,8 @@ PYBIND11_MODULE(PokerPy, m) {
 }
 
 // int main(){
-//     array<Card, 7> test_cards = {Card(12, 1), Card(11, 1), Card(11, 2), Card(10, 4), Card(9, 2), Card(3, 1), Card(3, 3)}; 
+//     array<Card, 7> test_cards = {Card(6, 3), Card(11, 3), Card(7, 2), Card(6, 4), Card(4, 1), Card(3, 2), Card(5, 4)};
+//     //[Card: 6♣, Card: J♣, Card: 7♦, Card: 6♠, Card: 4♥, Card: 3♦, Card: 5♠
 //     Hand hand = poker_algo_new::get_best_hand_not_sorted(test_cards);
 //     std::cout << "Hand: "<<hand_names[hand.hand_type - 1] << std::endl;
 //     for(auto card:hand.Cards){
