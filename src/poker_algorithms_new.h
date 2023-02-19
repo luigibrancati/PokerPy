@@ -2,6 +2,7 @@
 #define _POKER_ALGORITHMS_NEW_H
 
 #include "global.h"
+#include "utils.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -10,15 +11,16 @@
 #include <algorithm>
 
 namespace poker_algo_new {
-    // TODO: I still lack a good way of expanding ranges it with the remaining cards
-    using card_range = pair<Card*, Card*>;
-    using card_vec = vector<Card*>;
+    // TODO: I still lack a good way of expanding ranges with the remaining cards
+    using card_range = pair<uint8_t, uint8_t>;
+    using card_vec = vector<uint8_t>;
+    uint8_t NULL_PTR = 128;
 
-    card_vec expand_range(Card*& start, Card*& end) {
+    card_vec expand_range(uint8_t& start, uint8_t& end) {
         // Converts two pointers with a range into vector of pointers
         card_vec card_vec;
         card_vec.reserve(end-start+1);
-        for(auto i = start; i != end + 1; i++){
+        for(uint8_t i = start; i <= end; i++){
             card_vec.push_back(i);
         }
         return card_vec;
@@ -29,13 +31,32 @@ namespace poker_algo_new {
         return expand_range(range.first, range.second);
     }
 
-    void copy_vec(array<Card, 5>& array, card_vec& vec) {
-        for (uint8_t i = 0; i < 5; i++) array[i] = *vec[i];
+    void copy_vec(array<Card,7>& cards, array<Card, 5>& array, card_vec& vec) {
+        for (uint8_t i = 0; i < 5; i++) array[i] = cards[vec[i]];
+    }
+
+    void pad_card_vec(card_vec& vec, array<Card,7>& cards, short N) {
+        // Expand a vector of cards by including cards in value order
+        // Assumes the cards are ordered in decreasing order
+        vec.reserve(N);
+        bool is_in = false;
+        for(uint8_t c = 0; (c < cards.size()) && (vec.size() < N); c++) {
+            is_in = false;
+            for(auto v : vec){
+                if(cards[c] == cards[v]){
+                    is_in = true;
+                    break;
+                }
+            }
+            if(!is_in) {
+                vec.push_back(c);
+            }
+        }
     }
 
     bool has_ace(array<Card, 7>& array){
-        for(auto a:array){
-            if(a.value == 13){
+        for(Card card:array){
+            if(card.value == 13){
                 return true;
             }
         }
@@ -47,12 +68,12 @@ namespace poker_algo_new {
         // Assumes the cards are ordered in decreasing order
         card_vec flush_cards;
         flush_cards.reserve(5);
-        for (uint8_t i = 1; i < 5; i++){
+        for (uint8_t i = 1; i < 5; i++){ // cycle suits
             short num_same_suit = 0;
-            for (Card& card: cards){
-                if((num_same_suit < 5) && (card.suit == i)){
+            for (uint8_t j = 0; j < cards.size(); j++){
+                if((num_same_suit < 5) && (cards[j].suit == i)){
                     ++num_same_suit;
-                    flush_cards.push_back(&card);
+                    flush_cards.push_back(j);
                 }
             }
             if(num_same_suit>=5){
@@ -64,31 +85,30 @@ namespace poker_algo_new {
         return flush_cards;
     }
 
+    bool is_straight(array<Card,7>& cards, card_range& range) {
+        uint8_t straigh_num = 1;
+        for(uint8_t i = range.first+1; i <= range.second; i++){
+            if(cards[i].value == (cards[i-1].value - 1)){
+                ++straigh_num;
+                if(straigh_num == 5){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     vector<card_vec> find_all_straights(array<Card,7>& cards) {
-        // TODO: ACE can be worth 13 or 1, this changes the possible straights
         // Returns a vector of vectors, either empty or with all straights found
         // Assumes the cards are ordered in decreasing order
         vector<card_vec> all_straight_cards;
         all_straight_cards.reserve(3); // max 3 straights
-        uint8_t straigh_num = 1;
         // If cards are already ordered one of first, second or third card must be part of a straight (if there's one)
         // Start from high card, so straights are ordered based on high card
         for(uint8_t start = 0; start < 3; start++){
-            card_vec curr_straight = {&cards[start]};
-            straigh_num = 1;
-            uint8_t end = start+1;
-            for(end; end < cards.size(); end++){
-                if((cards[start].value == (cards[end].value + straigh_num)) && (cards[end].value != cards[end - 1].value)){
-                    ++straigh_num;
-                    curr_straight.push_back(&cards[end]);
-                    if(straigh_num == 5){
-                        all_straight_cards.push_back(curr_straight);
-                    }
-                } else if (cards[end].value == cards[end - 1].value) {
-                    continue;
-                } else {
-                    break;
-                }
+            card_range range = {start, start + 4};
+            if(is_straight(cards, range)) {
+                all_straight_cards.push_back(expand_range(range));
             }
         }
         // Consider ACE = 1
@@ -97,86 +117,49 @@ namespace poker_algo_new {
             array<Card,7> cards_module;
             uint8_t num_ace = 0;
             for(uint8_t i = 0; i<cards.size(); i++){
-                cards_module[i].value = cards[i].value % 12;
+                cards_module[i].value = cards[i].value==13 ? 1 : cards[i].value;
                 cards_module[i].suit = cards[i].suit;
                 if(cards[i].value == 13) ++num_ace;
             }
-            sort_cards(cards_module);
+            sort_cards<array<Card,7>>(cards_module);
             for(uint8_t start = 0; start < 3; start++){
-                card_vec curr_straight = {&cards[(start+num_ace)%7]};
-                straigh_num = 1;
-                uint8_t end = start+1;
-                for(end; end < cards.size(); end++){
-                    if((cards_module[start].value == (cards_module[end].value + straigh_num)) && (cards_module[end].value != cards_module[end - 1].value)){
-                        ++straigh_num;
-                        curr_straight.push_back(&cards[(end+num_ace)%7]);
-                        if(straigh_num == 5){
-                            all_straight_cards.push_back(curr_straight);
-                        }
-                    } else if (cards_module[end].value == cards_module[end - 1].value) {
-                        continue;
-                    } else {
-                        break;
-                    }
+                card_range range = {start, start + 4};
+                if(is_straight(cards_module, range)) {
+                    // Convert range to original cards
+                    card_vec vec = expand_range(range);
+                    for(auto& v: vec) v = (v + num_ace)%7;
+                    all_straight_cards.push_back(vec);
                 }
             }
         }
         return all_straight_cards;
     }
 
-    
-    void pad_card_vec(card_vec& vec, array<Card,7>& cards, short N) {
-        // Expand a vector of cards by including cards in value order
+    card_range find_repetition(array<Card,7>& cards, uint8_t start, uint8_t end, short N) {
+        // Returns a vector, either {null, null} or with the FIRST (i.e. with the highest cards) repetition of N cards found
         // Assumes the cards are ordered in decreasing order
-        vec.reserve(N);
-        bool is_in = false;
-        for(auto c = cards.begin(); (c != cards.end()) && (vec.size() < N); c++) {
-            is_in = false;
-            for(auto v : vec){
-                if(*c == *v){
-                    is_in = true;
-                    break;
-                }
-                
-            }
-            if(!is_in) {
-                vec.push_back(c);
+        for(uint8_t s = start; s < (end - N + 1); s++){
+            uint8_t e = (s + N - 1);
+            if(cards[s].value == cards[e].value){
+                return {s, e};
             }
         }
-    }
-
-    card_range find_repetition(array<Card,7>& cards, short N) {
-        // Returns a vector, either empty or with the FIRST (i.e. with the highest cards) repetition of N cards found
-        // Assumes the cards are ordered in decreasing order
-        card_range rep;
-        for(auto start = cards.begin(); start < (cards.end() - N + 1); start++){
-            auto end = (start + N - 1);
-            if(start->value == end->value){
-                rep = {start, end};
-                return rep;
-            }
-        }
-        return rep;
+        return {NULL_PTR, NULL_PTR};
     }
 
     vector<card_range> find_all_repetitions(array<Card,7>& cards, short N) {
         // Returns a vector, either empty or with the ALL repetition of N cards found
         // Assumes the cards are ordered in decreasing order
         vector<card_range> all_reps;
-        auto start = cards.begin();
-        auto end = start;
-        while((cards.end() - start) > 1) {
-            for(auto rep_start = start; rep_start < (cards.end() - N + 1); rep_start++){
-                auto rep_end = (rep_start + N - 1);
-                if(rep_start->value == rep_end->value){
-                    start = rep_start;
-                    end = rep_end;
-                    all_reps.push_back({start, end});
-                    start = end;
-                    continue;
-                }
+        uint8_t start = 0;
+        while((cards.size() - start) > 1) {
+            card_range rep = find_repetition(cards, start, cards.size(), N);
+            if(rep != card_range({NULL_PTR, NULL_PTR})){
+                all_reps.push_back(rep);
+                start = rep.second + 1;
+            } else {
+                ++start;
             }
-            ++start;
         }
         return all_reps;
     }
@@ -184,36 +167,36 @@ namespace poker_algo_new {
     Hand get_best_hand(array<Card,7>& cards){
         // WARNING This function assumes the cards are sorted beforehand
         Hand best_hand;
-        auto flush_vec = find_flush(cards);
-        auto all_straights = find_all_straights(cards);
+        card_vec flush_vec = find_flush(cards);
+        vector<card_vec> all_straights = find_all_straights(cards);
         bool has_flush = !flush_vec.empty();
         bool has_straight = !all_straights.empty();
         // Look for royal/straight flush
         if(has_flush) {
             // Look among straights which one is also a flush
-            for(auto straight_vec: all_straights){
-                uint8_t same_cards = 0;
-                // auto straight_vec = expand_range(straight);
-                for(uint8_t i = 0; i<5; i++){
-                    if(*straight_vec[i] == *flush_vec[i]) ++same_cards;
-                }
-                if(same_cards == 5) {
-                    best_hand.hand_type = (flush_vec[0]->value == 13)? RoyalFlush : StraightFlush;
-                    copy_vec(best_hand.Cards, flush_vec);
-                    sort_cards(best_hand.Cards);
+            for(card_vec straight_vec: all_straights){
+                // uint8_t same_cards = 0;
+                // // auto straight_vec = expand_range(straight);
+                // for(uint8_t i = 0; i<5; i++){
+                //     if(cards[straight_vec[i]] == cards[flush_vec[i]]) ++same_cards;
+                // }
+                if(flush_vec == straight_vec) {
+                    best_hand.hand_type = (cards[flush_vec[0]].value == 13)? RoyalFlush : StraightFlush;
+                    copy_vec(cards, best_hand.Cards, flush_vec);
+                    sort_cards<array<Card,5>>(best_hand.Cards);
                     return best_hand;
                 }
             }
         }
         // Look for poker
-        auto poker = find_repetition(cards, 4);
+        card_range poker = find_repetition(cards, 0, cards.size(), 4);
         if((poker.second + 1 - poker.first) == 4){
             best_hand.hand_type = Poker;
             // pad_card_range(cards, 5, poker);
-            auto poker_vec = expand_range(poker);
+            card_vec poker_vec = expand_range(poker);
             pad_card_vec(poker_vec, cards, 5);
-            copy_vec(best_hand.Cards, poker_vec);
-            sort_cards(best_hand.Cards);
+            copy_vec(cards, best_hand.Cards, poker_vec);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         }
         // Look for full house
@@ -249,66 +232,63 @@ namespace poker_algo_new {
             best_hand.hand_type = FullHouse;
             std::copy(full_start_1, full_end_1+1, best_hand.Cards.begin());
             std::copy(full_start_2, full_end_2+1, best_hand.Cards.begin() + len_1);
-            sort_cards(best_hand.Cards);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         } else if((len_1 + len_2) == 6){ // It may happen that there are 2 triples, but it's still a full house -> get the pair from the lowest triple
             best_hand.hand_type = FullHouse;
             std::copy(full_start_1, full_end_1+1, best_hand.Cards.begin());
             std::copy(full_start_2+1, full_end_2+1, best_hand.Cards.begin() + len_1);
-            sort_cards(best_hand.Cards);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         }
         // Look for flush
         if(has_flush){
             best_hand.hand_type = Flush;
-            // for (uint8_t i = 0; i < flush.size(); i++) best_hand.Cards[i] = *flush[i];
-            copy_vec(best_hand.Cards, flush_vec);
-            sort_cards(best_hand.Cards);
+            copy_vec(cards, best_hand.Cards, flush_vec);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         }
         // Look for best straight
         if(has_straight){
             best_hand.hand_type = Straight;
             // Straight are already ordered, best is first
-            copy_vec(best_hand.Cards, all_straights[0]);
-            // std::copy(all_straights[0].first, all_straights[0].second + 1, best_hand.Cards.begin());
-            sort_cards(best_hand.Cards);
+            copy_vec(cards, best_hand.Cards, all_straights[0]);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         }
         // Look for triples
-        auto triples = find_repetition(cards, 3);
+        card_range triples = find_repetition(cards, 0, cards.size(), 3);
         if((triples.second + 1 - triples.first) == 3){
             best_hand.hand_type = Triples;
-            // pad_card_range(cards, 5, triples);
-            auto triple_vec = expand_range(triples);
+            card_vec triple_vec = expand_range(triples);
             pad_card_vec(triple_vec, cards, 5);
-            copy_vec(best_hand.Cards, triple_vec);
-            sort_cards(best_hand.Cards);
+            copy_vec(cards, best_hand.Cards, triple_vec);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         }
         // Look for pairs or double pairs
-        auto all_pairs = find_all_repetitions(cards, 2);
+        vector<card_range> all_pairs = find_all_repetitions(cards, 2);
         if(all_pairs.size() >= 2) {
             best_hand.hand_type = DoublePairs;
-            auto dp_vec = expand_range(all_pairs[0]);
-            auto temp = expand_range(all_pairs[1]);
+            card_vec dp_vec = expand_range(all_pairs[0]);
+            card_vec temp = expand_range(all_pairs[1]);
             dp_vec.insert(dp_vec.end(), temp.begin(), temp.end());
             pad_card_vec(dp_vec, cards, 5);
-            copy_vec(best_hand.Cards, dp_vec);
-            sort_cards(best_hand.Cards);
+            copy_vec(cards, best_hand.Cards, dp_vec);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         } else if (all_pairs.size() == 1) {
             best_hand.hand_type = Pairs;
-            auto pair_vec = expand_range(all_pairs[0]);
+            card_vec pair_vec = expand_range(all_pairs[0]);
             pad_card_vec(pair_vec, cards, 5);
-            copy_vec(best_hand.Cards, pair_vec);
-            sort_cards(best_hand.Cards);
+            copy_vec(cards, best_hand.Cards, pair_vec);
+            sort_cards<array<Card,5>>(best_hand.Cards);
             return best_hand;
         }
         // High card
         best_hand.hand_type = HighCard;
         std::copy(cards.begin(), cards.begin() + 5, best_hand.Cards.begin());
-        sort_cards(best_hand.Cards);
+        sort_cards<array<Card,5>>(best_hand.Cards);
         return best_hand;
     }
 

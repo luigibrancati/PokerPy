@@ -4,9 +4,6 @@
 #include "global.h"
 #include <iostream>
 #include <string>
-#include <vector>
-#include <array>
-#include <map>
 #include <algorithm>
 #include <cmath>
 
