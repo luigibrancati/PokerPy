@@ -1,4 +1,99 @@
-from PokerPy import Card, Hand, calculate_hand_frequency, get_best_hand
+from PokerPy import Card, Hand, calculate_hand_frequency, get_best_hand, _find_flush, _is_straight, _find_all_straights, _find_repetition, _find_all_repetitions, _pad_card_vec
+import pytest
+
+
+@pytest.mark.parametrize(
+    "test_cards,value",
+    [
+        ([Card(8, 2), Card(7, 1), Card(6, 2), Card(5, 2), Card(4, 2), Card(3, 2), Card(2, 2)], [0, 2, 3, 4, 5]),
+        ([Card(8, 3), Card(7, 1), Card(6, 2), Card(5, 2), Card(4, 2), Card(3, 2), Card(2, 2)], [2, 3, 4, 5, 6]),
+        ([Card(8, 2), Card(7, 1), Card(6, 3), Card(5, 4), Card(4, 2), Card(3, 2), Card(2, 2)], []),
+    ]
+)
+def test_find_flush(test_cards, value):
+    assert _find_flush(test_cards) == value
+
+
+@pytest.mark.parametrize(
+    "test_cards,range,value",
+    [
+        ([Card(12, 2), Card(9, 1), Card(6, 1), Card(5, 3), Card(4, 3), Card(3, 3), Card(2, 2)], (2, 6), True),
+        ([Card(12, 2), Card(9, 1), Card(6, 1), Card(5, 3), Card(4, 3), Card(3, 3), Card(2, 2)], (0, 4), False),
+        ([Card(9, 1), Card(8, 1), Card(5, 3), Card(4, 3), Card(3, 3), Card(2, 2), Card(1, 1)], (2, 6), True),
+        ([Card(12, 2), Card(6, 1), Card(5, 1), Card(4, 3), Card(3, 3), Card(1, 3), Card(1, 2)], (2, 6), False),
+    ]
+)
+def test_is_straight(test_cards, range, value):
+    assert _is_straight(test_cards, range) == value
+
+
+@pytest.mark.parametrize(
+    "test_cards,value",
+    [
+        ([Card(8, 2), Card(7, 1), Card(6, 1), Card(5, 3), Card(4, 3), Card(3, 3), Card(2, 2)], [[0, 1, 2, 3, 4], [1, 2, 3, 4, 5], [2, 3, 4, 5, 6]]),
+        ([Card(12, 2), Card(9, 1), Card(6, 1), Card(5, 3), Card(4, 3), Card(3, 3), Card(2, 2)], [[2, 3, 4, 5, 6]]),
+        ([Card(13, 1), Card(12, 1), Card(11, 3), Card(5, 3), Card(4, 3), Card(3, 2), Card(2, 2)], [[0, 3, 4, 5, 6]]),
+        ([Card(13, 1), Card(12, 1), Card(11, 3), Card(4, 3), Card(4, 3), Card(3, 2), Card(2, 2)], []),
+    ]
+)
+def test_find_all_straights(test_cards, value):
+    assert _find_all_straights(test_cards) == value
+
+
+@pytest.mark.parametrize(
+    "test_cards,range,N,value",
+    [
+        ([Card(12, 2), Card(12, 1), Card(12, 1), Card(12, 3), Card(12, 3), Card(12, 3), Card(12, 2)], (0, 6), 7, (0, 6)),
+        ([Card(12, 2), Card(9, 1), Card(6, 1), Card(6, 3), Card(6, 2), Card(3, 3), Card(2, 2)], (0, 6), 3, (2, 4)),
+        ([Card(12, 2), Card(9, 1), Card(6, 1), Card(6, 3), Card(6, 2), Card(3, 3), Card(2, 2)], (0, 6), 2, (2, 3)),
+        ([Card(12, 2), Card(12, 1), Card(12, 1), Card(12, 3), Card(12, 3), Card(12, 3), Card(12, 2)], (0, 6), 8, (-1, -1)),
+        ([Card(12, 2), Card(11, 1), Card(10, 1), Card(9, 3), Card(8, 3), Card(7, 3), Card(6, 2)], (0, 6), 2, (-1, -1)),
+    ]
+)
+def test_find_repetition(test_cards, range, N, value):
+    assert _find_repetition(test_cards, range, N) == value
+
+
+@pytest.mark.parametrize(
+    "test_cards,N,value",
+    [
+        ([Card(12, 2), Card(12, 1), Card(12, 1), Card(6, 3), Card(6, 2), Card(6, 3), Card(2, 2)], 3, [(0, 2), (3, 5)]),
+        ([Card(12, 2), Card(12, 1), Card(11, 1), Card(6, 3), Card(6, 2), Card(2, 3), Card(2, 2)], 2, [(0, 1), (3, 4), (5, 6)]),
+        ([Card(12, 2), Card(11, 1), Card(10, 1), Card(9, 3), Card(8, 3), Card(7, 3), Card(6, 2)], 2, []),
+    ]
+)
+def test_find_all_repetitions(test_cards, N, value):
+    assert _find_all_repetitions(test_cards, N) == value
+
+
+@pytest.mark.parametrize(
+    "vec,cards,N,res",
+    [
+        ([1, 2, 3, 4], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(11, 1), Card(6, 3), Card(2, 2)], 5, [0, 1, 2, 3, 4]),
+        ([1, 2, 3, 4, 5], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(6, 1), Card(6, 3), Card(2, 2)], 6, [0, 1, 2, 3, 4, 5]),
+        ([1, 2, 3], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(6, 1), Card(5, 3), Card(2, 2)], 5, [0, 1, 2, 3, 4]),
+        ([1, 2, 5, 6], [Card(12, 2), Card(11, 4), Card(11, 3), Card(10, 2), Card(6, 1), Card(2, 3), Card(2, 2)], 5, [0, 1, 2, 5, 6]),
+        ([0, 2, 3, 5, 6], [Card(12, 2), Card(11, 4), Card(11, 2), Card(10, 2), Card(6, 1), Card(3, 2), Card(2, 2)], 6, [0, 1, 2, 3, 5, 6]),
+    ]
+)
+def test_pad_card_vec(vec, cards, N, res):
+    assert _pad_card_vec(vec, cards, N) == res
+
+
+@pytest.mark.parametrize(
+    "test_cards,hand",
+    [
+        (
+            [Card(13, 2), Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2), Card(2, 2), Card(2, 3)],
+            Hand("Royal Flush", [Card(13, 2), Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2)])
+        )
+    ]
+)
+def test_best_hand(test_cards, hand):
+    best_hand = get_best_hand(test_cards)
+    assert hand.hand_type == best_hand.hand_type
+    assert hand.Cards == best_hand.Cards
+
 
 def test_calculate_frec():
     test_cards = [[Card(12, 2),Card(8, 1)],[Card(12, 3),Card(13, 3)]]
@@ -8,10 +103,3 @@ def test_calculate_frec():
         {'Double Pairs': 347144, 'Draw': 20234, 'Flush': 124371, 'Full House': 28846, 'High Card': 337972, 'Pairs': 747226, 'Poker': 1430, 'Royal Flush': 992, 'Straight': 59303, 'Straight Flush': 70, 'Total Cases': 1712305, 'Triples': 64950, 'Win': 1311188}
     ]
     assert frecs == test_frecs
-
-def test_best_hand():
-    test_cards = [Card(12, 2), Card(9, 1), Card(12, 3), Card(13, 3), Card(3, 3), Card(2, 2), Card(1, 2)]
-    best_hand = get_best_hand(test_cards)
-    test_hand = Hand("Pairs", [Card(12, 2),Card(12, 3), Card(13, 3), Card(9, 1), Card(3, 3)])
-    assert test_hand.hand_type == best_hand.hand_type
-    assert test_hand.Cards == best_hand.Cards
