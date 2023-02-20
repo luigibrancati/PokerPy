@@ -337,7 +337,7 @@ namespace poker_algo_new {
                     max_hand_heuristic = player_hand_euristic;
                     drawed_players = 1;
                     drawed_players_indx[0] = p;
-                }else if (player_hand_euristic == max_hand_heuristic){
+                } else if (player_hand_euristic == max_hand_heuristic){
                     drawed_players_indx[drawed_players] = p;
                     drawed_players++;
                 }
@@ -368,9 +368,7 @@ namespace poker_algo_new {
             }
             num_possible_cases++;
         }
-        for (int l = 0; l < num_players; l++) {
-            players_hand_possibilities[l]["Total Cases"] = num_possible_cases;
-        }
+        for (int l = 0; l < num_players; l++) players_hand_possibilities[l]["Total Cases"] = num_possible_cases;
         return players_hand_possibilities;
     }
 
