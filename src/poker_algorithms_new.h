@@ -195,7 +195,7 @@ namespace poker_algo_new {
         }
         // Look for full house
         card_range triple = find_repetition(cards, card_range({0, cards.size() - 1}), 3);
-        card_range pair_1 = find_repetition(cards, card_range({0, triple.first - 1}), 2);
+        card_range pair_1 = find_repetition(cards, card_range({0, triple.first - 1}), 2); // Pairs can happen before or after the triple
         card_range pair_2 = find_repetition(cards, card_range({triple.second + 1, cards.size() - 1}), 2);
         card_range pair = (pair_1 != NULL_RANGE ? pair_1 : pair_2);
         if((triple != NULL_RANGE) && (pair != NULL_RANGE)){
@@ -214,7 +214,7 @@ namespace poker_algo_new {
             copy_vec(cards, best_hand.Cards, flush_vec);
             return best_hand;
         }
-        // Look for best straight
+        // Look for straight
         if(has_straight){
             best_hand.hand_type = Straight;
             // Straight are already ordered, best is first
@@ -253,23 +253,23 @@ namespace poker_algo_new {
         return best_hand;
     }
 
-    std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> cards){
+    vector<map<string,int>> calculate_hand_frequency(vector<vector<Card>> cards){
         int num_given_cards = cards[0].size();
-        std::vector<std::array<Card,7>> players_cards;
+        vector<array<Card,7>> players_cards;
         // Sort the cards and plaace them in arrays of 7 cards
         for (int i = 0; i < cards.size(); i++)
         {
-            std::array<Card,7> temp;
+            array<Card,7> temp;
             sort(cards[i].begin(),cards[i].end(),[](Card &a,Card &b){return a.value > b.value;});
             copy(cards[i].begin(),cards[i].end(),temp.begin());
             players_cards.push_back(temp);
         }
         // Create the new hand array for passing it to the get_best_hand Function
-        std::array<Card,7> new_hand;
+        array<Card,7> new_hand;
         string possible_hand_types[10] = {"Royal Flush","Straight Flush","Poker","Full House","Flush","Straight","Triples","Double Pairs","Pairs","High Card"};
         // Create the map with the hand_types and the number of hands of that type
-        std::vector<std::map<string,int>> players_hand_posibilities;
-        std::map<string,int> hand_posibilities;
+        vector<map<string,int>> players_hand_posibilities;
+        map<string,int> hand_posibilities;
         for (int i = 0; i < 10; i++)
         {
             hand_posibilities[possible_hand_types[i]] = 0;
@@ -283,7 +283,7 @@ namespace poker_algo_new {
         }
         Hand result;
         // Create all possible cards
-        std::vector<Card> possible_cards;
+        vector<Card> possible_cards;
         for (int j = 13; j > 0; j--)
         {
             for (int i = 4; i > 0; i--)
@@ -309,13 +309,13 @@ namespace poker_algo_new {
             
         }
         
-        std::array<int,5> indexes = {0,1,2,3,4};
+        array<int,5> indexes = {0,1,2,3,4};
         int n = (7-num_given_cards);
         int N = possible_cards.size();
         int num_possible_cases = 1;
         int intersected_cards = 0;
         int player_hand_euristic = 0;
-        std::array<int,10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
+        array<int,10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
         while (true){
             int max_hand_heuristic = 0;
             int drawed_players = 0;
@@ -381,6 +381,7 @@ namespace poker_algo_new {
         for (int l = 0; l < players_cards.size(); l++)
         {
             players_hand_posibilities[l]["Total Cases"] = num_possible_cases;
+
         }
         return players_hand_posibilities;
     }
