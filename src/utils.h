@@ -11,7 +11,7 @@ using namespace std;
 
 template<class T>
 void sort_cards(T& cards) {
-    std::sort(cards.begin(), cards.end(), [](Card& a, Card& b){return (a.value>=b.value);});
+    std::sort(cards.begin(), cards.end(), [](Card& a, Card& b){return (a>=b);});
 }
 
 string round_float(float a,int num_decimals) {
