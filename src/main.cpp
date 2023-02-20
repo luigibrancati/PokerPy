@@ -82,12 +82,13 @@ PYBIND11_MODULE(PokerPy, m) {
 }
 
 // int main(){
-//     array<Card, 7> test_cards = {Card(13, 3), Card(11, 2), Card(10, 2), Card(2, 4), Card(2, 3), Card(2, 2), Card(2, 1)};
-//     Hand hand = poker_algo_new::get_best_hand_not_sorted(test_cards);
-//     std::cout << "Hand: "<<hand_names[hand.hand_type - 1] << std::endl;
-//     for(auto card:hand.Cards){
-//         std::cout<<card.value<<card.suit<<" ";
-//     }
-//     std::cout<<endl;
+//     vector<vector<Card>> test_cards = {{Card(12, 2),Card(8, 1)}, {Card(12, 3),Card(13, 3)}};
+//     auto res = poker_algo_new::calculate_hand_frequency(test_cards, {});
+//     // Hand hand = poker_algo_new::get_best_hand_not_sorted(test_cards);
+//     // std::cout << "Hand: "<<hand_names[hand.hand_type - 1] << std::endl;
+//     // for(auto card:hand.Cards){
+//     //     std::cout<<card.value<<card.suit<<" ";
+//     // }
+//     // std::cout<<endl;
 //     return 0;
 // }
