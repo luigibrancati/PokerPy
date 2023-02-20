@@ -124,7 +124,7 @@ def test_best_hand(test_cards, hand):
 
 def test_calculate_frec():
     test_cards = [[Card(12, 2),Card(8, 1)],[Card(12, 3),Card(13, 3)]]
-    frecs = calculate_hand_frequency_new(test_cards)
+    frecs = calculate_hand_frequency_new(test_cards, [])
     test_frecs = [
         {'Double Pairs': 357732, 'Draw': 18347, 'Flush': 38786, 'Full House': 28846, 'High Card': 358523, 'Pairs': 796506, 'Poker': 1430, 'Royal Flush': 34, 'Straight': 63602, 'Straight Flush': 153, 'Total Cases': 1712305, 'Triples': 66692, 'Win': 370183},
         {'Double Pairs': 349041, 'Draw': 18347, 'Flush': 124887, 'Full House': 28846, 'High Card': 338887, 'Pairs': 757097, 'Poker': 1430, 'Royal Flush': 528, 'Straight': 46435, 'Straight Flush': 18, 'Total Cases': 1712305, 'Triples': 65135, 'Win': 1323774}

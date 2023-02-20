@@ -253,24 +253,25 @@ namespace poker_algo_new {
         return best_hand;
     }
 
-
     bool has_card(Card& card, std::array<Card, 7>& cards){
         for (auto& temp : cards) {
-            if (card == temp){
+            if (card == temp) {
                 return true;
             }
         }
         return false;
     }
 
-    std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> cards){
-        uint8_t num_players = cards.size();
-        uint8_t num_dealt_cards = cards[0].size();
+    std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> hand_cards, std::vector<Card> table_cards){
+        uint8_t num_players = hand_cards.size();
+        uint8_t num_dealt_cards = hand_cards[0].size() + table_cards.size();
+        uint8_t num_table_cards = table_cards.size();
         // Sort the cards and plaace them in arrays of 7 cards
         std::vector<array<Card,7>> players_cards;
         for (uint8_t p = 0; p < num_players; p++) {
             std::array<Card,7> temp;
-            copy(cards[p].begin(),cards[p].end(),temp.begin());
+            copy(table_cards.begin(),table_cards.end(),temp.begin());
+            copy(hand_cards[p].begin(),hand_cards[p].end(),temp.begin() + num_table_cards);
             sort_cards<std::array<Card,7>>(temp);
             players_cards.push_back(temp);
         }
@@ -308,7 +309,7 @@ namespace poker_algo_new {
         int num_possible_cases = 1;
         int player_hand_euristic = 0;
         std::array<int,10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
-        while (true){
+        while (true) {
             int max_hand_heuristic = 0;
             int drawed_players = 0;
             for (uint8_t p = 0; p < num_players; p++) {
@@ -342,6 +343,7 @@ namespace poker_algo_new {
                     drawed_players++;
                 }
             }
+            num_possible_cases++;
             // Calculate who won
             if (drawed_players == 1) {
                 players_hand_possibilities[drawed_players_indx[0]]["Win"]++;
@@ -366,7 +368,6 @@ namespace poker_algo_new {
                     break;
                 }
             }
-            num_possible_cases++;
         }
         for (int l = 0; l < num_players; l++) players_hand_possibilities[l]["Total Cases"] = num_possible_cases;
         return players_hand_possibilities;
