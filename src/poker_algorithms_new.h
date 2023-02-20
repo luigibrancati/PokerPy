@@ -265,6 +265,7 @@ namespace poker_algo_new {
     std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> hand_cards, std::vector<Card> table_cards){
         uint8_t num_players = hand_cards.size();
         uint8_t num_dealt_cards = hand_cards[0].size() + table_cards.size();
+        uint8_t num_not_dealt_cards = (7-num_dealt_cards);
         uint8_t num_table_cards = table_cards.size();
         // Sort the cards and plaace them in arrays of 7 cards
         std::vector<array<Card,7>> players_cards;
@@ -302,10 +303,9 @@ namespace poker_algo_new {
                 }
             }
         }
+        uint8_t num_remaining_cards = remaining_cards.size();
         // Create the new hand array for passing it to the get_best_hand Function
         std::array<uint8_t, 5> indexes = {0,1,2,3,4};
-        uint8_t num_not_dealt_cards = (7-num_dealt_cards);
-        uint8_t num_remaining_cards = remaining_cards.size();
         int num_possible_cases = 1;
         int player_hand_euristic = 0;
         std::array<int, 10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
@@ -344,7 +344,7 @@ namespace poker_algo_new {
                     drawed_players++;
                 }
             }
-            num_possible_cases++;
+            ++num_possible_cases;
             // Calculate who won
             if (drawed_players == 1) {
                 players_hand_possibilities[drawed_players_indx[0]]["Win"]++;
