@@ -253,6 +253,16 @@ namespace poker_algo_new {
         return best_hand;
     }
 
+
+    bool has_card(Card& card, std::array<Card, 7>& cards){
+        for (auto& temp : cards) {
+            if (card == temp){
+                return true;
+            }
+        }
+        return false;
+    }
+
     std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> cards){
         uint8_t num_players = cards.size();
         uint8_t num_dealt_cards = cards[0].size();
@@ -276,21 +286,17 @@ namespace poker_algo_new {
         }
         // Create all possible cards
         std::vector<Card> remaining_cards;
-        for (uint8_t j = 13; j > 0; j--) {
-            for (uint8_t i = 4; i > 0; i--) {
-                Card new_card;
+        for (uint8_t v = 13; v > 0; v--) {
+            for (uint8_t s = 4; s > 0; s--) {
+                Card new_card = {v, s};
                 bool alredy_in_hand = false;
-                for (uint8_t l = 0; l < players_cards.size(); l++) {
-                    for (uint8_t k = 0; k < num_dealt_cards; k++) {
-                        if (players_cards[l][k].value == j && players_cards[l][k].suit == i){
-                            alredy_in_hand = true;
-                            break;
-                        }
+                for (auto& player : players_cards) {
+                    if(has_card(new_card, player)) {
+                        alredy_in_hand = true;
+                        break;
                     }
                 }
                 if (!alredy_in_hand){
-                    new_card.value = j;
-                    new_card.suit = (Suit)i;
                     remaining_cards.push_back(new_card);
                 }
             }
