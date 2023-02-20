@@ -253,7 +253,7 @@ namespace poker_algo_new {
         return best_hand;
     }
 
-    bool has_card(Card& card, std::array<Card, 7>& cards){
+    bool has_card(Card& card, std::vector<Card>& cards) {
         for (auto& temp : cards) {
             if (card == temp) {
                 return true;
@@ -263,6 +263,9 @@ namespace poker_algo_new {
     }
 
     std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> hand_cards, std::vector<Card> table_cards){
+        // Create array with all dealt cards and some helper variables
+        std::vector<Card> all_dealt_cards = table_cards;
+        for (auto player : hand_cards) all_dealt_cards.insert(all_dealt_cards.end(), player.begin(), player.end());
         uint8_t num_players = hand_cards.size();
         uint8_t num_dealt_cards = hand_cards[0].size() + table_cards.size();
         uint8_t num_not_dealt_cards = (7-num_dealt_cards);
@@ -291,21 +294,12 @@ namespace poker_algo_new {
         for (uint8_t v = 13; v > 0; v--) {
             for (uint8_t s = 4; s > 0; s--) {
                 Card new_card = {v, s};
-                bool alredy_in_hand = false;
-                for (auto& player : players_cards) {
-                    if(has_card(new_card, player)) {
-                        alredy_in_hand = true;
-                        break;
-                    }
-                }
-                if (!alredy_in_hand){
-                    remaining_cards.push_back(new_card);
-                }
+                if(!has_card(new_card, all_dealt_cards)) remaining_cards.push_back(new_card);
             }
         }
         uint8_t num_remaining_cards = remaining_cards.size();
         // Create the new hand array for passing it to the get_best_hand Function
-        std::array<uint8_t, 5> indexes = {0,1,2,3,4};
+        card_vec indexes = {0,1,2,3,4};
         int num_possible_cases = 1;
         int player_hand_euristic = 0;
         std::array<int, 10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
