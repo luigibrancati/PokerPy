@@ -308,7 +308,7 @@ namespace poker_algo_new {
         uint8_t num_remaining_cards = remaining_cards.size();
         int num_possible_cases = 1;
         int player_hand_euristic = 0;
-        std::array<int,10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
+        std::array<int, 10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
         while (true) {
             int max_hand_heuristic = 0;
             int drawed_players = 0;
@@ -330,6 +330,7 @@ namespace poker_algo_new {
                     }
                     new_hand[i] = remaining_cards[indexes[i-intersected_cards]];
                 }
+                // Compute best hand
                 Hand result = get_best_hand(new_hand);
                 players_hand_possibilities[p][hand_names[result.hand_type - 1]]++;
                 // Check if win or draw
