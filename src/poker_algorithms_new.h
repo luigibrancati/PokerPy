@@ -253,47 +253,35 @@ namespace poker_algo_new {
         return best_hand;
     }
 
-    vector<map<string,int>> calculate_hand_frequency(vector<vector<Card>> cards){
-        int num_given_cards = cards[0].size();
-        vector<array<Card,7>> players_cards;
+    std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> cards){
+        uint8_t num_players = cards.size();
+        uint8_t num_dealt_cards = cards[0].size();
         // Sort the cards and plaace them in arrays of 7 cards
-        for (int i = 0; i < cards.size(); i++)
-        {
-            array<Card,7> temp;
-            sort(cards[i].begin(),cards[i].end(),[](Card &a,Card &b){return a.value > b.value;});
-            copy(cards[i].begin(),cards[i].end(),temp.begin());
+        std::vector<array<Card,7>> players_cards;
+        for (uint8_t p = 0; p < num_players; p++) {
+            std::array<Card,7> temp;
+            copy(cards[p].begin(),cards[p].end(),temp.begin());
+            sort_cards<std::array<Card,7>>(temp);
             players_cards.push_back(temp);
         }
-        // Create the new hand array for passing it to the get_best_hand Function
-        array<Card,7> new_hand;
-        string possible_hand_types[10] = {"Royal Flush","Straight Flush","Poker","Full House","Flush","Straight","Triples","Double Pairs","Pairs","High Card"};
         // Create the map with the hand_types and the number of hands of that type
-        vector<map<string,int>> players_hand_posibilities;
-        map<string,int> hand_posibilities;
-        for (int i = 0; i < 10; i++)
-        {
-            hand_posibilities[possible_hand_types[i]] = 0;
+        string possible_hand_types[10] = {"Royal Flush","Straight Flush","Poker","Full House","Flush","Straight","Triples","Double Pairs","Pairs","High Card"};
+        std::vector<std::map<string,int>> players_hand_possibilities;
+        for (uint8_t p = 0; p < num_players; p++) {
+            std::map<string,int> hand_possibilities;
+            for (auto pht : possible_hand_types) hand_possibilities[pht] = 0;
+            hand_possibilities["Win"] = 0;
+            hand_possibilities["Draw"] = 0;
+            players_hand_possibilities.push_back(hand_possibilities);
         }
-        hand_posibilities["Win"] = 0;
-        hand_posibilities["Draw"] = 0;
-        for (int l = 0; l < players_cards.size(); l++)
-        {
-            players_hand_posibilities.push_back(hand_posibilities);
-
-        }
-        Hand result;
         // Create all possible cards
-        vector<Card> possible_cards;
-        for (int j = 13; j > 0; j--)
-        {
-            for (int i = 4; i > 0; i--)
-            {
+        std::vector<Card> remaining_cards;
+        for (uint8_t j = 13; j > 0; j--) {
+            for (uint8_t i = 4; i > 0; i--) {
                 Card new_card;
                 bool alredy_in_hand = false;
-                for (int l = 0; l < players_cards.size(); l++)
-                {
-                    for (int k = 0; k < num_given_cards; k++)
-                    {
+                for (uint8_t l = 0; l < players_cards.size(); l++) {
+                    for (uint8_t k = 0; k < num_dealt_cards; k++) {
                         if (players_cards[l][k].value == j && players_cards[l][k].suit == i){
                             alredy_in_hand = true;
                             break;
@@ -303,87 +291,81 @@ namespace poker_algo_new {
                 if (!alredy_in_hand){
                     new_card.value = j;
                     new_card.suit = (Suit)i;
-                    possible_cards.push_back(new_card);
+                    remaining_cards.push_back(new_card);
                 }
             }
-            
         }
-        
-        array<int,5> indexes = {0,1,2,3,4};
-        int n = (7-num_given_cards);
-        int N = possible_cards.size();
+        // Create the new hand array for passing it to the get_best_hand Function
+        std::array<uint8_t, 5> indexes = {0,1,2,3,4};
+        uint8_t num_not_dealt_cards = (7-num_dealt_cards);
+        uint8_t num_remaining_cards = remaining_cards.size();
         int num_possible_cases = 1;
-        int intersected_cards = 0;
         int player_hand_euristic = 0;
-        array<int,10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
+        std::array<int,10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
         while (true){
             int max_hand_heuristic = 0;
             int drawed_players = 0;
-            for (int l = 0; l < players_cards.size(); l++)
-            {
+            for (uint8_t p = 0; p < num_players; p++) {
                 // Sort efficiently the hand cards for efficiency
-                intersected_cards = 0;
-                for (int i = 0; i < 7; i++)
-                {
-                    if (intersected_cards < num_given_cards){
-                        if (i-intersected_cards >= n){
-                            new_hand[i] = players_cards[l][intersected_cards];
+                uint8_t intersected_cards = 0;
+                std::array<Card,7> new_hand;
+                for (uint8_t i = 0; i < 7; i++) {
+                    if (intersected_cards < num_dealt_cards) {
+                        if (i-intersected_cards >= num_not_dealt_cards) {
+                            new_hand[i] = players_cards[p][intersected_cards];
                             intersected_cards++;
                             continue;
-                        }else if (players_cards[l][intersected_cards].value >= possible_cards[indexes[i-intersected_cards]].value){
-                            new_hand[i] = players_cards[l][intersected_cards];
+                        } else if (players_cards[p][intersected_cards].value >= remaining_cards[indexes[i-intersected_cards]].value) {
+                            new_hand[i] = players_cards[p][intersected_cards];
                             intersected_cards++;
                             continue;
                         }
                     }
-                    new_hand[i] = possible_cards[indexes[i-intersected_cards]];
+                    new_hand[i] = remaining_cards[indexes[i-intersected_cards]];
                 }
-
-                result = get_best_hand(new_hand);
-                players_hand_posibilities[l][hand_names[result.hand_type - 1]]++;
+                Hand result = get_best_hand(new_hand);
+                players_hand_possibilities[p][hand_names[result.hand_type - 1]]++;
                 // Check if win or draw
                 player_hand_euristic = result.hand_heuristic();
                 if (player_hand_euristic > max_hand_heuristic){
                     max_hand_heuristic = player_hand_euristic;
                     drawed_players = 1;
-                    drawed_players_indx[0] = l;
+                    drawed_players_indx[0] = p;
                 }else if (player_hand_euristic == max_hand_heuristic){
-                    drawed_players_indx[drawed_players] = l;
+                    drawed_players_indx[drawed_players] = p;
                     drawed_players++;
                 }
             }
-            if (drawed_players == 1){
-                players_hand_posibilities[drawed_players_indx[0]]["Win"]++;
-            }else{
-                for (int i = 0; i < drawed_players; i++)
-                {
-                    players_hand_posibilities[drawed_players_indx[i]]["Draw"]++;
+            // Calculate who won
+            if (drawed_players == 1) {
+                players_hand_possibilities[drawed_players_indx[0]]["Win"]++;
+            } else {
+                for (int i = 0; i < drawed_players; i++) {
+                    players_hand_possibilities[drawed_players_indx[i]]["Draw"]++;
                 }
             }
-            num_possible_cases++;
-            if (indexes[0] == N-n){
+            if (indexes[0] == num_remaining_cards-num_not_dealt_cards){
                 break;
             }
             // Create a new combination of indexes
             // Iterate backwards through the indexes
-            for (int i = 1; i <= n ; i++) {
+            for (uint8_t i = 1; i <= num_not_dealt_cards ; i++) {
                 // Check if index can be aumented 
-                if (indexes[n-i] < N-i) {
-                    indexes[n-i]++;
+                if (indexes[num_not_dealt_cards-i] < num_remaining_cards-i) {
+                    indexes[num_not_dealt_cards-i]++;
                     // Go through the following indexes to reduce them to the minimum possible value
-                    for (int j = n-i+1; j < n; j++) {
+                    for (uint8_t j = num_not_dealt_cards-i+1; j < num_not_dealt_cards; j++) {
                         indexes[j] = indexes[j-1] + 1;
                     }
                     break;
                 }
             }
+            num_possible_cases++;
         }
-        for (int l = 0; l < players_cards.size(); l++)
-        {
-            players_hand_posibilities[l]["Total Cases"] = num_possible_cases;
-
+        for (int l = 0; l < num_players; l++) {
+            players_hand_possibilities[l]["Total Cases"] = num_possible_cases;
         }
-        return players_hand_posibilities;
+        return players_hand_possibilities;
     }
 
     Hand get_best_hand_not_sorted(std::array<Card,7> cards){
