@@ -3,6 +3,19 @@ import pytest
 
 
 @pytest.mark.parametrize(
+    "vec,cards,N,res",
+    [
+        ([1, 2, 3], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(11, 1), Card(6, 3), Card(2, 2)], 5, [0, 1, 2, 3, 4]),
+        ([1, 3, 5], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(6, 1), Card(6, 3), Card(2, 2)], 6, [0, 1, 2, 3, 4, 5]),
+        ([1, 2, 5, 6], [Card(12, 2), Card(11, 4), Card(11, 3), Card(10, 2), Card(6, 1), Card(2, 3), Card(2, 2)], 5, [0, 1, 2, 5, 6]),
+        ([0, 2, 3, 5, 6], [Card(12, 2), Card(11, 4), Card(11, 2), Card(10, 2), Card(6, 1), Card(3, 2), Card(2, 2)], 6, [0, 1, 2, 3, 5, 6]),
+    ]
+)
+def test_pad_card_vec(vec, cards, N, res):
+    assert _pad_card_vec(vec, cards, N) == res
+
+
+@pytest.mark.parametrize(
     "test_cards,value",
     [
         ([Card(8, 2), Card(7, 1), Card(6, 2), Card(5, 2), Card(4, 2), Card(3, 2), Card(2, 2)], [0, 2, 3, 4, 5]),
@@ -67,19 +80,6 @@ def test_find_all_repetitions(test_cards, N, value):
 
 
 @pytest.mark.parametrize(
-    "vec,cards,N,res",
-    [
-        ([1, 2, 3], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(11, 1), Card(6, 3), Card(2, 2)], 5, [0, 1, 2, 3, 4]),
-        ([1, 3, 5], [Card(12, 2), Card(11, 4), Card(11, 3), Card(11, 2), Card(6, 1), Card(6, 3), Card(2, 2)], 6, [0, 1, 2, 3, 4, 5]),
-        ([1, 2, 5, 6], [Card(12, 2), Card(11, 4), Card(11, 3), Card(10, 2), Card(6, 1), Card(2, 3), Card(2, 2)], 5, [0, 1, 2, 5, 6]),
-        ([0, 2, 3, 5, 6], [Card(12, 2), Card(11, 4), Card(11, 2), Card(10, 2), Card(6, 1), Card(3, 2), Card(2, 2)], 6, [0, 1, 2, 3, 5, 6]),
-    ]
-)
-def test_pad_card_vec(vec, cards, N, res):
-    assert _pad_card_vec(vec, cards, N) == res
-
-
-@pytest.mark.parametrize(
     "test_cards,hand",
     [
         (
@@ -87,20 +87,52 @@ def test_pad_card_vec(vec, cards, N, res):
             Hand("Royal Flush", [Card(13, 2), Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2)])
         ),
         (
+            [Card(13, 4), Card(13, 3), Card(13, 2), Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2)],
+            Hand("Royal Flush", [Card(13, 2), Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2)])
+        ),
+        (
             [Card(13, 3), Card(11, 2), Card(10, 2), Card(9, 2), Card(8, 2), Card(7, 2), Card(2, 2)],
             Hand("Straight Flush", [Card(11, 2), Card(10, 2), Card(9, 2), Card(8, 2), Card(7, 2)])
+        ),
+        (
+            [Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2), Card(8, 2), Card(7, 2), Card(2, 2)],
+            Hand("Straight Flush", [Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2), Card(8, 2)])
+        ),
+        (
+            [Card(13, 1), Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2), Card(8, 2), Card(6, 2)],
+            Hand("Straight Flush", [Card(12, 2), Card(11, 2), Card(10, 2), Card(9, 2), Card(8, 2)])
         ),
         (
             [Card(13, 3), Card(11, 2), Card(10, 2), Card(2, 4), Card(2, 3), Card(2, 2), Card(2, 1)],
             Hand("Poker", [Card(13, 3), Card(2, 4), Card(2, 3), Card(2, 2), Card(2, 1)])
         ),
         (
+            [Card(13, 4), Card(13, 3), Card(13, 2), Card(13, 1), Card(2, 3), Card(2, 2), Card(2, 1)],
+            Hand("Poker", [Card(13, 4), Card(13, 3), Card(13, 2), Card(13, 1), Card(2, 3)])
+        ),
+        (
+            [Card(13, 3), Card(11, 4), Card(11, 3), Card(11, 2), Card(11, 1), Card(2, 2), Card(2, 1)],
+            Hand("Poker", [Card(13, 3), Card(11, 4), Card(11, 3), Card(11, 2), Card(11, 1)])
+        ),
+        (
             [Card(13, 3), Card(13, 2), Card(13, 1), Card(4, 4), Card(3, 3), Card(2, 2), Card(2, 1)],
             Hand("Full House", [Card(13, 3), Card(13, 2), Card(13, 1), Card(2, 2), Card(2, 1)])
         ),
         (
+            [Card(13, 3), Card(13, 2), Card(13, 1), Card(4, 4), Card(4, 3), Card(2, 2), Card(2, 1)],
+            Hand("Full House", [Card(13, 3), Card(13, 2), Card(13, 1), Card(4, 4), Card(4, 3)])
+        ),
+        (
             [Card(13, 3), Card(13, 2), Card(11, 1), Card(10, 4), Card(9, 3), Card(8, 2), Card(7, 1)],
             Hand("Straight", [Card(11, 1), Card(10, 4), Card(9, 3), Card(8, 2), Card(7, 1)])
+        ),
+        (
+            [Card(13, 3), Card(12, 2), Card(11, 1), Card(10, 4), Card(9, 3), Card(8, 2), Card(7, 1)],
+            Hand("Straight", [Card(13, 3), Card(12, 2), Card(11, 1), Card(10, 4), Card(9, 3)])
+        ),
+        (
+            [Card(12, 3), Card(12, 2), Card(11, 1), Card(10, 4), Card(9, 3), Card(8, 2), Card(7, 1)],
+            Hand("Straight", [Card(12, 2), Card(11, 1), Card(10, 4), Card(9, 3), Card(8, 2)])
         ),
         (
             [Card(13, 3), Card(12, 2), Card(11, 1), Card(6, 4), Card(6, 3), Card(6, 2), Card(2, 1)],
