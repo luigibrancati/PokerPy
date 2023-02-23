@@ -80,15 +80,3 @@ PYBIND11_MODULE(PokerPy, m) {
     ////
     m.def("nice_print_frequencies", &nice_print_frequencies, "A function that gets the frequencies of the possible hands and prints them in nice format");
 }
-
-// int main(){
-//     vector<vector<Card>> test_cards = {{Card(12, 2),Card(8, 1)}, {Card(12, 3),Card(13, 3)}};
-//     auto res = poker_algo_new::calculate_hand_frequency(test_cards, {});
-//     // Hand hand = poker_algo_new::get_best_hand_not_sorted(test_cards);
-//     // std::cout << "Hand: "<<hand_names[hand.hand_type - 1] << std::endl;
-//     // for(auto card:hand.Cards){
-//     //     std::cout<<card.value<<card.suit<<" ";
-//     // }
-//     // std::cout<<endl;
-//     return 0;
-// }
