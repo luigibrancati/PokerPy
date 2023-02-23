@@ -85,15 +85,15 @@ def test_find_all_repetitions(test_cards, N, value):
         (
             [[Card(12, 2), Card(8, 1)],[Card(12, 3), Card(13, 3)]],
             [
-                {'Double Pairs': 357732, 'Draw': 18348, 'Flush': 38757, 'Full House': 28846, 'High Card': 358523, 'Pairs': 796506, 'Poker': 1430, 'Royal Flush': 34, 'Straight': 63602, 'Straight Flush': 182, 'Total Cases': 1712305, 'Triples': 66692, 'Win': 370182},
-                {'Double Pairs': 349041, 'Draw': 18348, 'Flush': 124854, 'Full House': 28846, 'High Card': 338887, 'Pairs': 757097, 'Poker': 1430, 'Royal Flush': 562, 'Straight': 46435, 'Straight Flush': 17, 'Total Cases': 1712305, 'Triples': 65135, 'Win': 1323774}
+                {'Double Pairs': 357732, 'Draw': 18348, 'Flush': 38757, 'Full House': 28846, 'High Card': 358523, 'Pairs': 796506, 'Poker': 1430, 'Royal Flush': 34, 'Straight': 63602, 'Straight Flush': 182, 'Total Cases': 1712304, 'Triples': 66692, 'Win': 370182},
+                {'Double Pairs': 349041, 'Draw': 18348, 'Flush': 124854, 'Full House': 28846, 'High Card': 338887, 'Pairs': 757097, 'Poker': 1430, 'Royal Flush': 562, 'Straight': 46435, 'Straight Flush': 17, 'Total Cases': 1712304, 'Triples': 65135, 'Win': 1323774}
             ]
         ),
         (
             [[Card(13, 4), Card(13, 3)], [Card(13, 2), Card(13, 1)]],
             [
-                {'Double Pairs': 842724, 'Draw': 1637856, 'Flush': 38737, 'Full House': 45408, 'High Card': 0, 'Pairs': 763290, 'Poker': 528, 'Royal Flush': 55, 'Straight': 21546, 'Straight Flush': 16, 'Total Cases': 1712305, 'Triples': 0, 'Win': 37224},
-                {'Double Pairs': 842724, 'Draw': 1637856, 'Flush': 38737, 'Full House': 45408, 'High Card': 0, 'Pairs': 763290, 'Poker': 528, 'Royal Flush': 55, 'Straight': 21546, 'Straight Flush': 16, 'Total Cases': 1712305, 'Triples': 0, 'Win': 37224}
+                {'Double Pairs': 842724, 'Draw': 1637856, 'Flush': 38737, 'Full House': 45408, 'High Card': 0, 'Pairs': 763290, 'Poker': 528, 'Royal Flush': 55, 'Straight': 21546, 'Straight Flush': 16, 'Total Cases': 1712304, 'Triples': 0, 'Win': 37224},
+                {'Double Pairs': 842724, 'Draw': 1637856, 'Flush': 38737, 'Full House': 45408, 'High Card': 0, 'Pairs': 763290, 'Poker': 528, 'Royal Flush': 55, 'Straight': 21546, 'Straight Flush': 16, 'Total Cases': 1712304, 'Triples': 0, 'Win': 37224}
             ]
         )
     ]

@@ -20,13 +20,13 @@ string round_float(float a,int num_decimals) {
     return total_number.substr(0,total_number.find(".")+2);
 }
 
-int binomial_coefficient(const uint8_t n, const uint8_t k) {
+int binomial_coefficient(const size_t n, const size_t k) {
     if (k == 0) {
         return 1;
     }
     int step1;
     int step0 = n - k + 1;
-    for (uint8_t i = 1; i < k; ++i) {
+    for (size_t i = 1; i < k; ++i) {
         step1 = step0 * (n - k + 1 + i) / (i + 1);
         step0 = step1;
     }

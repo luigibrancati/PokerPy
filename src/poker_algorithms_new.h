@@ -15,6 +15,7 @@ namespace poker_algo_new {
     using card_vec = std::vector<int8_t>;
     const int8_t NULL_PTR = -1;
     const card_range NULL_RANGE = {NULL_PTR, NULL_PTR};
+    const uint8_t TOTAL_CARDS = 52;
 
     card_vec expand_range(card_range range) {
         // Converts two pointers with a range into vector of pointers
@@ -265,7 +266,7 @@ namespace poker_algo_new {
         // Create a new combination of indexes
         // Iterate backwards through the indexes
         // TODO expand this to accept also less than 2 cards per user
-        for (uint8_t i = indexes.size(); i >= 0; --i) {
+        for (uint8_t i = indexes.size() - 1; i >= 0; --i) {
             // Check if index can be aumented 
             if (indexes[i] < (num_remaining_cards - indexes.size() + i)) {
                 ++indexes[i];
@@ -299,7 +300,7 @@ namespace poker_algo_new {
         }
         // Create all possible cards
         std::vector<Card> remaining_cards;
-        remaining_cards.reserve(52 - all_dealt_cards.size());
+        remaining_cards.reserve(TOTAL_CARDS - all_dealt_cards.size());
         for (uint8_t v = 13; v > 0; v--) {
             for (uint8_t s = 4; s > 0; s--) {
                 Card new_card = {v, s};
@@ -310,7 +311,7 @@ namespace poker_algo_new {
         // Create the new hand array for passing it to the get_best_hand Function
         std::vector<uint8_t> indexes(num_missing_turns);
         for(uint8_t i = 0; i < num_missing_turns; ++i) indexes[i] = i;
-        int num_possible_cases = 1;
+        int num_possible_cases = 0;
         int player_hand_euristic = 0;
         std::array<int, 10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
         while (true) {
@@ -349,7 +350,7 @@ namespace poker_algo_new {
             }
             next_combination(indexes, num_remaining_cards);
         }
-        for (int l = 0; l < num_players; l++) players_hand_possibilities[l]["Total Cases"] = num_possible_cases;
+        for (int p = 0; p < num_players; p++) players_hand_possibilities[p]["Total Cases"] = num_possible_cases;
         return players_hand_possibilities;
     }
 }
