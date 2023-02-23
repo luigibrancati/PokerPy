@@ -261,13 +261,16 @@ namespace poker_algo_new {
         return false;
     }
 
-    void new_indexes(std::array<uint8_t, 5>& indexes, const uint8_t& num_missing_turns, const uint8_t& num_remaining_cards){
-        for (uint8_t i = 1; i <= num_missing_turns ; i++) {
+    void next_combination(std::vector<uint8_t>& indexes, const uint8_t& num_remaining_cards) {
+        // Create a new combination of indexes
+        // Iterate backwards through the indexes
+        // TODO expand this to accept also less than 2 cards per user
+        for (uint8_t i = indexes.size(); i >= 0; --i) {
             // Check if index can be aumented 
-            if (indexes[num_missing_turns-i] < num_remaining_cards-i) {
-                indexes[num_missing_turns-i]++;
+            if (indexes[i] < (num_remaining_cards - indexes.size() + i)) {
+                ++indexes[i];
                 // Go through the following indexes to reduce them to the minimum possible value
-                for (uint8_t j = num_missing_turns-i+1; j < num_missing_turns; j++) {
+                for (uint8_t j = i+1; j < indexes.size(); ++j) {
                     indexes[j] = indexes[j-1] + 1;
                 }
                 break;
@@ -275,39 +278,7 @@ namespace poker_algo_new {
         }
     }
 
-    int binomial_coefficient(const uint8_t n, const uint8_t k) {
-        if (k == 0) {
-            return 1;
-        }
-        int step1;
-        int step0 = n - k + 1;
-        for (uint8_t i = 1; i < k; ++i) {
-            step1 = step0 * (n - k + 1 + i) / (i + 1);
-            step0 = step1;
-        }
-        return step1;
-    }
-
-    std::vector<std::vector<Card>> generate_all_combinations(std::vector<Card>& remaining_cards){
-        const uint8_t N = 48; // size of remaining_cards
-        const uint8_t k = 5;
-        const int num_combinations = 1712304; // 48 cards in groups of 5
-        std::vector<std::vector<Card>> combinations(num_combinations, std::vector<Card>(5));
-        std::vector<bool> selectors(N, false);
-        std::fill(selectors.end() - k, selectors.end(), true);
-        do {
-            std::vector<Card> combination(k);
-            for(uint8_t i = 0; i < N; i++) {
-                if(selectors[i]) {
-                    combination.push_back(remaining_cards[i]);
-                }
-            }
-            combinations.push_back(combination);
-        }while(std::next_permutation(selectors.begin(), selectors.end()));
-        return combinations;
-    }
-
-    std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> hand_cards, std::vector<Card> table_cards){
+    std::vector<std::map<string,int>> calculate_hand_frequency(std::vector<std::vector<Card>> hand_cards, std::vector<Card> table_cards) {
         // Create array with all dealt cards and some helper variables
         std::vector<Card> all_dealt_cards = table_cards;
         for (auto player : hand_cards) all_dealt_cards.insert(all_dealt_cards.end(), player.begin(), player.end());
@@ -337,7 +308,8 @@ namespace poker_algo_new {
         }
         const uint8_t num_remaining_cards = remaining_cards.size();
         // Create the new hand array for passing it to the get_best_hand Function
-        std::array<uint8_t, 5> indexes = {0,1,2,3,4};
+        std::vector<uint8_t> indexes(num_missing_turns);
+        for(uint8_t i = 0; i < num_missing_turns; ++i) indexes[i] = i;
         int num_possible_cases = 1;
         int player_hand_euristic = 0;
         std::array<int, 10> drawed_players_indx = {0,0,0,0,0,0,0,0,0,0};
@@ -364,22 +336,18 @@ namespace poker_algo_new {
                     drawed_players++;
                 }
             }
-            ++num_possible_cases;
             // Calculate who won
             if (drawed_players == 1) {
                 players_hand_possibilities[drawed_players_indx[0]]["Win"]++;
             } else {
                 for (int i = 0; i < drawed_players; i++) players_hand_possibilities[drawed_players_indx[i]]["Draw"]++;
             }
+            // Check wheter to continue the loop and computes next combination of indexes
+            ++num_possible_cases;
             if (indexes[0] == num_remaining_cards-num_missing_turns) {
                 break;
             }
-            // Create a new combination of indexes
-            // Iterate backwards through the indexes
-            // TODO: instead of playing around with indexes, try generating in one step all possible table cards combinations
-            // (i.e. combinations of 5 cards, since the indexes vector has 5 components anyway it won't hinder usability)
-            // TODO expand this to accept also less than 2 cards per user
-            new_indexes(indexes, num_missing_turns, num_remaining_cards);
+            next_combination(indexes, num_remaining_cards);
         }
         for (int l = 0; l < num_players; l++) players_hand_possibilities[l]["Total Cases"] = num_possible_cases;
         return players_hand_possibilities;
