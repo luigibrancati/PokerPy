@@ -1,17 +1,18 @@
-import sys
 # Available at setup time due to pyproject.toml
 from pybind11 import get_cmake_dir
-from pybind11.setup_helpers import Pybind11Extension, build_ext,ParallelCompile
+from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
 __version__ = "1.0.2.dev0"
 
 
 ext_modules = [
-    Pybind11Extension("PokerPy",
+    Pybind11Extension(
+        "PokerPy",
         ["src/main.cpp"],
-        cxx_std=20
-        ),
+        cxx_std=20,
+        extra_compile_args = ['-O3', '-Wall']
+    ),
 ]
 
 setup(
